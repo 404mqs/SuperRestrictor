@@ -55,10 +55,10 @@ namespace SuperRestrictor
         {
             var playername = player.CharacterName;
 
+            RestrictedName username = Configuration.Instance.RestrictedNames.FirstOrDefault(n => playername.ToLower().Contains(n.name.ToLower()));
+
             if ((player.IsAdmin && Configuration.Instance.IgnoreAdmins) || player.GetPermissions().Any(x => x.Name == "ignore.*"))
                 return;
-
-            RestrictedName username = Configuration.Instance.RestrictedNames.FirstOrDefault(n => playername.ToLower().Contains(n.name.ToLower()));
 
             if (username != null && !player.GetPermissions().Any(x => x.Name == username.Bypass))
             {
@@ -78,10 +78,10 @@ namespace SuperRestrictor
         {
             var converted = UnturnedPlayer.FromSteamPlayer(player);
 
+            RestrictedWord message = Configuration.Instance.RestrictedWords.FirstOrDefault(w => text.ToLower().Contains(w.name.ToLower()));
+
             if ((converted.IsAdmin && Configuration.Instance.IgnoreAdmins) || converted.GetPermissions().Any(x => x.Name == "ignore.*"))
                 return;
-
-            RestrictedWord message = Configuration.Instance.RestrictedWords.FirstOrDefault(w => text.ToLower().Contains(w.name.ToLower()));
 
             if (message != null && !converted.GetPermissions().Any(x => x.Name == message.Bypass))
             {
@@ -104,10 +104,10 @@ namespace SuperRestrictor
         {
             var driver = UnturnedPlayer.FromPlayer(player);
 
+            RestrictedVehicle car = Configuration.Instance.RestrictedVehicles.FirstOrDefault(x => x.VehicleId == vehicle.id);
+
             if ((driver.IsAdmin && Configuration.Instance.IgnoreAdmins) || driver.GetPermissions().Any(x => x.Name == "ignore.*"))
                 return;
-
-            RestrictedVehicle car = Configuration.Instance.RestrictedVehicles.FirstOrDefault(x => x.VehicleId == vehicle.id);
 
             if (car != null && !driver.GetPermissions().Any(x => x.Name == car.Bypass))
             {
@@ -127,10 +127,10 @@ namespace SuperRestrictor
 
         private void OnInventoryUpdated(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
         {
+            RestrictedItem item = Configuration.Instance.RestrictedItems.FirstOrDefault(x => x.Id == P.item.id);
+
             if ((player.IsAdmin && Configuration.Instance.IgnoreAdmins) || player.GetPermissions().Any(x => x.Name == "ignore.*"))
                 return;
-
-            RestrictedItem item = Configuration.Instance.RestrictedItems.FirstOrDefault(x => x.Id == P.item.id);
 
             if (item != null && !player.GetPermissions().Any(x => x.Name == item.Bypass))
             { 
@@ -149,10 +149,10 @@ namespace SuperRestrictor
 
         private void OnWear(UnturnedPlayer player, UnturnedPlayerEvents.Wearables wear, ushort id, byte? quality)
         {
+            RestrictedItem item = Configuration.Instance.RestrictedItems.FirstOrDefault(x => x.Id == id);
+
             if ((player.IsAdmin && Configuration.Instance.IgnoreAdmins) || player.GetPermissions().Any(x => x.Name == "ignore.*"))
                 return;
-
-            RestrictedItem item = Configuration.Instance.RestrictedItems.FirstOrDefault(x => x.Id == id);
 
             if (item != null && !player.GetPermissions().Any(x => x.Name == item.Bypass))
             {
