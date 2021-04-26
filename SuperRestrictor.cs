@@ -24,10 +24,15 @@ namespace SuperRestrictor
             Instance = this;
 
             ChatManager.onChatted += onChat;
+
             U.Events.OnPlayerConnected += OnPlayerConnected;
+
             UnturnedPlayerEvents.OnPlayerInventoryAdded += OnInventoryUpdated;
             UnturnedPlayerEvents.OnPlayerWear += OnWear;
+
             VehicleManager.onEnterVehicleRequested += OnEnterVehicleRequested;
+
+            PlayerCrafting.onCraftBlueprintRequested += OnPlayerCraft;
 
             Logger.LogWarning("++++++++++++++++++++++++++++++++++++++");
             Logger.LogWarning($"[{Name}] has been loaded! ");
@@ -36,18 +41,20 @@ namespace SuperRestrictor
             Logger.LogWarning("++++++++++++++++++++++++++++++++++++++");
         }
 
-
-
         protected override void Unload()
         {
             Instance = null;
 
-            ChatManager.onChatted += onChat;
+            ChatManager.onChatted -= onChat;
+
             U.Events.OnPlayerConnected -= OnPlayerConnected;
+
             UnturnedPlayerEvents.OnPlayerInventoryAdded -= OnInventoryUpdated;
             UnturnedPlayerEvents.OnPlayerWear -= OnWear;
+
             VehicleManager.onEnterVehicleRequested -= OnEnterVehicleRequested;
 
+            PlayerCrafting.onCraftBlueprintRequested -= OnPlayerCraft;
         }
 
 
@@ -122,7 +129,6 @@ namespace SuperRestrictor
                     UnturnedChat.Say(driver, car.Message, Color.red);
                 }
             }
-
         }
 
         private void OnInventoryUpdated(UnturnedPlayer player, InventoryGroup inventoryGroup, byte inventoryIndex, ItemJar P)
@@ -143,6 +149,31 @@ namespace SuperRestrictor
                 else
                 {
                     UnturnedChat.Say(player, item.Message, Color.red);
+                }
+            }
+        }
+
+        private void OnPlayerCraft(PlayerCrafting crafting, ref ushort itemId, ref byte blueprintIndex, ref bool shouldAllow)
+        {
+            ushort value = itemId;
+            RestrictedCraft craft = Configuration.Instance.RestrictedCrafts.FirstOrDefault(x => x.Id == value);
+
+            UnturnedPlayer user = UnturnedPlayer.FromPlayer(crafting.player);
+
+            if ((user.IsAdmin && Configuration.Instance.IgnoreAdmins) || user.GetPermissions().Any(x => x.Name == "ignore.*"))
+                return;
+
+            if (craft != null && !user.GetPermissions().Any(x => x.Name == craft.Bypass))
+            {
+                shouldAllow = false;
+                if (craft.Message == null)
+                {
+                    UnturnedChat.Say(user, Instance.Translate("CraftBlacklist"), Color.red);
+                }
+
+                else
+                {
+                    UnturnedChat.Say(user, craft.Message, Color.red);
                 }
             }
         }
@@ -204,7 +235,8 @@ namespace SuperRestrictor
                 { "WordBlacklisted", "You said a word that is on the blacklist. Please moderate yourself!" },
                 { "ItemBlacklisted", "You are not allowed to loot that item." },
                 { "NameBlacklist", "Your name is in the Blacklist. Please change it." },
-                { "VehicleBlacklist", "You are not allowed to drive this vehicle. The vehicle is in the Blacklist."}
+                { "VehicleBlacklist", "You are not allowed to drive this vehicle. The vehicle is in the Blacklist."},
+                { "CraftBlacklist", "This craft is not allowed." }
             };
     }
 }
